@@ -1,2 +1,4 @@
-# R-DATA-SCIENCE
-Clase de R-Studio
+TAREA 1
+   CURSO: # R-DATA-SCIENCE
+   Clase de R-Studio
+   FECHA: 20-02-2022
