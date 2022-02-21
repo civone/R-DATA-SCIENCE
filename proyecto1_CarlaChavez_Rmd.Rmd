@@ -1,0 +1,476 @@
+---
+title: "Proyecto1"
+author: "CarlaChavez"
+date: "14/2/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# **Caso N° 1: Siniestros en Seguros**
+
+Se tiene un conjunto de datos simulado basado en seis meses de la información recogida por una aseguradora mundial llamada **"VIDA SEGUROS"**, cuyo objetivo fue desarrollar un modelo para determinar la probabilidad de siniestro en los próximos 12 meses. La variable de destino es la siniestralidad, que representa el estado binario de No Siniestro 0 y Siniestro 1.
+
+Descripción de las Variables:
+
+Cliente_ID: Identificador de cliente.
+Antigüedad_Maxima: Antigüedad del cliente en meses.
+Nivel_Ingresos: Nivel de ingresos de 0 (bajo) a 5 (alto).
+Saldo_Pendiente: Saldo pendiente del cliente.
+Puntaje_Morosidad: Tasa de morosidad en el seguro. O: No Dq., 1: 1-29, ..., 6: 150-179.
+Saldo_Pendiente_Seg: Saldo pendiente de la póliza del seguro.
+Siniestros: Número de siniestros en la historia del cliente.
+Estado_Siniestro:** 0: No Siniestro, 1: Siniestro.
+
+
+# Direccionando la carptea de trabajo
+
+```{r}
+getwd()
+
+setwd("C:/DISCO_CARLA/CURSOS/2022-Curso_R_ Estadistica/PROYECTO")
+```
+
+```{r}
+data_seguros <- read.csv("Data_Siniestros en Seguros .csv", stringsAsFactors = TRUE, sep=",")
+```
+
+
+```{r}
+View(data_seguros)
+```
+
+```{r}
+head(data_seguros)
+```
+
+```{r}
+dim(data_seguros)
+```
+
+```{r}
+str(data_seguros)
+```
+COMENTARIO: Del analisis de cada variable:
+
+'data.frame':	5800 obs. of  18 variables:
+ $ Cliente_ID         : int  185 238 346 460 54 ...:   Convertir a CARACTER
+ $ Antigüedad_Maxima  : int  44 79 102 NA 109  ...:    Queda como variable numerica ENTERA
+ $ Nivel_Ingresos     : int  1 1 1 1 NA NA 0 1 0 0 ..: Se observa que siendo niveles debe ser categorica, se pasa a FACTOR
+ $ Saldo_Pendiente    : num  605 1006 299 645 218 ...: Queda igual como NUMERICO
+ 
+ Las variables Puntaje de Morosidad: Como indica su nombre Puntaje y se observa de acuerdo a la estructira (str), que los valores  van de 0 a 7, entonces se concluye que debe ser categorica-ordinal, por lo tanto se convertirá a FACTOR
+ 
+ $ Puntaje_Morosidad1 : int  0 0 0 0 0 0 0 0 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ $ Puntaje_Morosidad2 : int  0 0 0 0 0 0 0 0 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ $ Puntaje_Morosidad3 : int  0 0 0 0 0 0 0 1 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ $ Puntaje_Morosidad4 : int  0 0 0 0 0 0 0 0 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ $ Puntaje_Morosidad5 : int  0 0 0 0 0 0 0 0 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ $ Puntaje_Morosidad6 : int  0 0 0 0 0 0 0 0 0 0 ... :  Es categorica-ordinal, se pasa a FACTOR
+ 
+ 
+ $ Saldo_Pendiente_Seg: num  0 0 0 0 0 0 0 0 0 0 ... :  Queda igual como NUMERICO y varia de 0 a 442335
+ 
+ **Las variables Siniestros: Como se observa como entero y varia entre 0 a 289, quedará igual como ENTERO**
+  
+ $ Siniestros1        : int  0 0 0 0 0 0 0 0 0 0 ... :  Queda igual como ENTERO
+ $ Siniestros2        : int  0 0 0 0 0 0 0 0 0 0 ... :  Queda igual como ENTERO
+ $ Siniestros3        : int  0 0 0 0 0 0 0 0 0 0 ... :  Queda igual como ENTERO
+ $ Siniestros4        : int  0 0 0 0 0 0 0 1 0 0 ... :  Queda igual como ENTERO
+ $ Siniestros5        : int  0 0 0 0 0 0 0 1 0 0 ... :  Queda igual como ENTERO
+ $ Siniestros6        : int  0 0 0 0 0 0 0 1 0 0 ... :  Queda igual como ENTERO
+ 
+  
+ $ Estado_Siniestro   : Factor w/ 3 levels "","no","si": 2 2 2 2 2 2 2 2 2 2 ... :Quedará igual como FACTOR, como se importó
+
+
+```{r}
+summary(data_seguros)
+```
+** Proceso de Conversion de Variables**
+
+```{r}
+# Se convierte Cliente_ID a caracter
+data_seguros$Cliente_ID <- as.character(data_seguros$Cliente_ID) 
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor
+data_seguros$Nivel_Ingresos <- as.factor(as.character(data_seguros$Nivel_Ingresos)) 
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor
+data_seguros$Puntaje_Morosidad1 <- as.factor(as.character(data_seguros$Puntaje_Morosidad1)) 
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor 
+data_seguros$Puntaje_Morosidad2 <- as.factor(as.character(data_seguros$Puntaje_Morosidad2))
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor 
+data_seguros$Puntaje_Morosidad3 <- as.factor(as.character(data_seguros$Puntaje_Morosidad3)) 
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor
+data_seguros$Puntaje_Morosidad4 <- as.factor(as.character(data_seguros$Puntaje_Morosidad4)) 
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor
+data_seguros$Puntaje_Morosidad5 <- as.factor(as.character(data_seguros$Puntaje_Morosidad5))
+
+# Se convierte Nivel ingresos a factor, pero primero se convertirá a caracter y luego a factor
+data_seguros$Puntaje_Morosidad6 <- as.factor(as.character(data_seguros$Puntaje_Morosidad6))
+
+```
+## **Estructura de datos con las variables transformadas**
+```{r}
+str(data_seguros)
+```
+## Analizando la variable con la nueva estructura
+Se observan datos en blanco
+
+
+```{r}
+summary(data_seguros)
+```
+
+## OBSERVACION DE DATOS FALTANTES
+
+Se observa que la variable dependiente de interes "Estado_Siniestro" tiene datos faltantes
+
+Estado_Siniestro
+      :1068         
+    no:4236         
+    si: 496 
+
+Se procederá a retirar de la data los datos en blanco
+El comando correrá sobre todas las filas
+
+```{r}
+data_seguros_ok <- data_seguros[data_seguros$Estado_Siniestro %in% c("si", "no"),]
+head(data_seguros_ok,20)
+```
+
+```{r}
+data_seguros_ok <- data_seguros[data_seguros$Estado_Siniestro %in% c("si", "no"),]
+head(data_seguros_ok,20)
+```
+###Aplicar Estadística Descriptiva 
+
+De acuerdo al planteamiento del proyecto que es evaluar la siniestralidad, la cual es representada por la variable Estados de siniestro, entonces:
+Se plantea hacer anaálsis univariado a traves de estadisticas descriptivas
+Se plantea realizar una exploracion del comportamiento de los variables de acuerdo a la siniestralidad, por tanto se realizará el analiis de correlacion de las variables versus la variable Estado de Siniestro.
+
+#Para el análisis a traves de la estadistica descriptiva se ejecutará
+
+*1-* Sumamry para asi obtener la principaes estadísticos ocmo análisis univariado
+*2-* Diagrama de pares de variables con la función ggpairs del paquete GGally
+
+#Hallazgos 
+
+
+**Antigüedad_Maxima**
+
+**Nivel_Ingresos Saldo_Pendiente**
+
+
+**Puntaje_Morosidad1**
+**Puntaje_Morosidad2**
+**Puntaje_Morosidad3**
+**Puntaje_Morosidad4** 
+**Puntaje_Morosidad5** 
+**Puntaje_Morosidad6**
+**Saldo_Pendiente_Seg**  
+**Siniestros1**
+**Siniestros2**       
+**Siniestros3**      
+**Siniestros4** 
+**Siniestros5**      
+**Siniestros6**      
+**Estado_Siniestro**
+
+```{r}
+summary(data_seguros_ok)
+```
+
+```{r}
+str(data_seguros_ok$Estado_Siniestro)
+head(data_seguros_ok$Estado_Siniestro)
+table(data_seguros_ok$Estado_Siniestro)
+table(data_seguros_ok$Estado_Siniestro)/(nrow(data_seguros_ok))*100
+```
+```{r}
+#install.packages("GGally")
+
+library(GGally)
+```
+
+```{r}
+ggpairs(data_seguros_ok[,c("Antigüedad_Maxima", "Saldo_Pendiente", "Saldo_Pendiente_Seg", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro))
+```
+
+```{r}
+ggpairs(data_seguros_ok[,c("Siniestros1", "Siniestros2", "Siniestros3", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Siniestros4", "Siniestros5", "Siniestros6", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Nivel_Ingresos", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = 2)
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad1", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad2", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad3", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad4", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad5", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+```{r}
+ggpairs(data_seguros_ok[,c("Puntaje_Morosidad6", "Estado_Siniestro")], aes(colour=data_seguros_ok$Estado_Siniestro),legend = c(1,2))
+```
+
+### Aplicar Estadística Inferencial 
+
+De acuerdo al nális exploratorio y en atención al objetivo del proyecto a fin de evaluar la probabilidad de siniestralidad se plantea evaluar las hipotesis:
+1: La antiguedad Maxima es mayor en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+2: El Saldo Pendiente del cliente  es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad 
+3: El Saldo Pendiente de la poliza de Seguro es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+4: El promedio de Número de siniestro en el mes 1 es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+5: El promedio de Número de siniestro en el mes 2 es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+6: El promedio de Número de siniestro en el mes 3 es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+7: El promedio de Número de siniestro en el mes 4 es diferente en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+
+
+
+# 1: La antiguedad Maxima es mayor en clientes que presentan siniestralidad con respecto de los que no presentan siniestralidad
+
+Se observa datos outliers en la variable Antigüedad Maxima
+
+Se analiza la distribucion de los valores de Antiguedad Maxima
+Observando: que no tienen distribución normal y es asimetrica hacia la derecha
+Por tanto, es pertinente analizar los outliers y se realizará a traves del diagrama de cajas
+
+```{r}
+hist(data_seguros_ok$Antigüedad_Maxima)
+```
+# A fin de analizar la distribución de los outliers se utilizará el diagrama de cajas (de forma horizontal)
+
+Se observan datos fuera de bigote derecho
+
+```{r}
+boxplot(data_seguros_ok$Antigüedad_Maxima, horizontal=TRUE)
+```
+Se obtiene la lista de valores de los datos outliers a traves de la funcion boxplot.stats
+
+```{r}
+boxplot.stats(data_seguros_ok$Antigüedad_Maxima)
+```
+Se obtiene datos del boxplot
+
+LOS VALORES DE CORTE DE LA CAJA ($stats)
+[1]   6  16  41  82 181
+
+Bigote inferior = 6
+Limite inferior = 16
+Mediana de los datos de Antiúedad Maxima= 41
+Limite Superior = 82
+Bigote Superior = 181
+
+CANTIDAD DE DATOS ($n)
+[1] 4250
+
+INTERVALO DE CONFIANZA AL 95% CONFIANZA PARA LA MEDIANA
+$conf
+[1] 39.40042 42.59958
+
+LISTA DE VALORES OUTLIERS
+Con 97 valores
+Siendo el mínimo valor de 182 y maximo de 255
+
+$out
+ [1] 183 220 255 190 190 201 203 201 182 189 201
+[12] 192 223 204 192 213 202 183 214 216 209 199
+[23] 194 224 189 184 217 217 186 221 205 183 224
+[34] 194 191 196 183 194 199 190 208 184 200 184
+[45] 186 202 190 201 228 209 186 224 188 227 183
+[56] 182 197 196 227 184 231 217 186 187 186 191
+[67] 191 195 189 190 185 228 196 185 191 186 190
+[78] 208 196 233 223 190 233 194 222 204 194 214
+[89] 198 197 207 233 187 206 191 226 190
+
+Se procede a obtener una lista de valores que no son outliers.  
+Se observa que la variable Antigüedad_Maxima, tiene datos nulos
+
+Se procede en la variable Antigüedad_Maxima 
+Retirar los datos outliers 
+Retirar los datos nuelos
+
+```{r}
+# Retirando los datos outlier
+data_seguros_ok_sin_out <- data_seguros_ok[data_seguros_ok$Antigüedad_Maxima<182,]
+
+# Retirando los datos nulos
+# Se crea una nueva data sin nulos y outlier  
+data_seguros_sin_out_null_AntMax <- data_seguros_ok_sin_out[is.na(data_seguros_ok_sin_out$Antigüedad_Maxima) == FALSE, ]
+
+str(data_seguros_sin_out_null_AntMax)
+summary(data_seguros_sin_out_null_AntMax)
+View(data_seguros_sin_out_null_AntMax )
+boxplot(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima, horizontal=TRUE)
+
+```
+# Retirando los datos outlier
+En el nuevo conjunto de datos "data_seguros_sin_out_null_AntMax"
+Se repetiran los pasos anteriores
+
+Se obtiene la lista de valores de los datos outliers a traves de la funcion boxplot.stats
+
+
+```{r}
+boxplot.stats(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima)
+```
+#Se obtiene datos del boxplot
+
+LOS VALORES DE CORTE DE LA CAJA ($stats)
+[1]    6  16  39  78 171
+
+Bigote inferior = 6
+Limite inferior = 16
+Mediana de los datos de Antiúedad Maxima= 39
+Limite Superior = 78
+Bigote Superior = 171
+
+CANTIDAD DE DATOS ($n)
+[1] 4153
+
+INTERVALO DE CONFIANZA AL 95% CONFIANZA PARA LA MEDIANA
+$conf
+[1] 37.47992 40.52008
+
+LISTA DE VALORES OUTLIERS
+Con 35 valores
+Siendo el mínimo valor de 172 y maximo de 181
+
+$out
+ [1] 172 178 172 180 178 173 175 173 178 176 175 179 181 181 181 172 173 176 177
+[20] 174 180 176 181 172 178 179 175 177 175 172 174 172 176 175 176
+
+#Se procede a obtener una lista de valores que no son outliers.  
+
+#Se procede en la variable Antigüedad_Maxima 
+#Retirar los datos outliers 
+
+```{r}
+# Retirando los datos outlier
+data_seguros_sin_out_null_AntMax <- data_seguros_sin_out_null_AntMax[data_seguros_sin_out_null_AntMax$Antigüedad_Maxima<172,]
+```
+
+# A fin de analizar la distribución de los outliers se utilizará el diagrama de cajas (de forma horizontal)
+
+Se observan datos fuera de bigote derecho
+
+```{r}
+boxplot(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima, horizontal=TRUE)
+```
+```{r}
+boxplot.stats(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima)
+```
+#Se obtiene datos del boxplot
+
+LOS VALORES DE CORTE DE LA CAJA ($stats)
+[1]   6  16  39  77 168
+
+Bigote inferior = 6
+Limite inferior = 16
+Mediana de los datos de Antiúedad Maxima= 39
+Limite Superior = 77
+Bigote Superior = 168
+
+CANTIDAD DE DATOS ($n)
+[1] 4118
+
+INTERVALO DE CONFIANZA AL 95% CONFIANZA PARA LA MEDIANA
+$conf
+[1] 37.49809 40.50191
+
+LISTA DE VALORES OUTLIERS
+Con 8 valores
+Siendo el mínimo valor de 169 y maximo de 171
+
+$out
+[1] 171 169 171 169 171 169 169 169
+
+
+#Se procede a obtener una lista de valores que no son outliers.  
+
+#Se procede en la variable Antigüedad_Maxima 
+#Retirar los datos outliers 
+
+```{r}
+# Retirando los datos outlier
+data_seguros_sin_out_null_AntMax <- data_seguros_sin_out_null_AntMax[data_seguros_sin_out_null_AntMax$Antigüedad_Maxima<169,]
+```
+
+# De nuevo a fin de analizar la distribución de los outliers se utilizará el diagrama de cajas (de forma horizontal)
+
+# NO se observan datos fuera de bigote derecho e izquierdo
+
+```{r}
+boxplot(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima, horizontal=TRUE)
+```
+# Una vez obtenida la data preaprada sin outlier con respecto a la variable Antigüedad_Maxima
+# permitirá hacer la inferencia estadística
+
+# Hipotesis par acomparcion de medias del Antiguedad Maxima segun el presencia o ausencia de sieniestralidad
+
+# 1: Ho:La Antiguedad Maxima es mayor en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+     H1:La Antiguedad Maxima es menor en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+# se verifica la normalidad de la variable
+
+HIPÓTESIS
+
+Ho: Los datos de la variables Antigüedad_Maxima estan normalmente distribuidos      
+Ha: Los datos de la variables Antigüedad_Maxima no estan normalmente distribuidos
+
+Nivel de significancia = 5% (0.05)
+```{r}
+# Test: Kolmogorov-Smirnov "para la prueba de normalidad, n>50 casos"
+library(nortest) 
+lillie.test(data_seguros_sin_out_null_AntMax$Antigüedad_Maxima)$p.value  # $p.value =  muestrame el p_value
+```
+Se obsera un p_value <0.05 
+
+Decisión: Los datos de la variables "Antigüedad_Maxima" NO están normalmente distribuidos; esto afirmamos con un nivel de confianza del 95% / nivel de significancia del 5%. 
+
+data_seguros_ok_sin_out <- data_seguros_ok[data_seguros_ok$Antigüedad_Maxima<182,]
+
+```{r}
+data_seguros_sin_out_null_AntMax_ES_si <- data_seguros_sin_out_null_AntMax[data_seguros_sin_out_null_AntMax$Estado_Siniestro=="si", ]
+
+#str(data_seguros_sin_out_null_AntMax_ES_si)
+
+data_seguros_sin_out_null_AntMax_ES_no <- data_seguros_sin_out_null_AntMax[data_seguros_sin_out_null_AntMax$Estado_Siniestro=="no", ]
+
+#str(data_seguros_sin_out_null_AntMax_ES_no)
+
+
+hist(data_seguros_sin_out_null_AntMax_ES_si$Antigüedad_Maxima, main = "Presencia Siniestralidad", xlab = "Antigüedad_Maxima",col = "yellow")
+hist(data_seguros_sin_out_null_AntMax_ES_no$Antigüedad_Maxima, main = "Ausencia Siniestralidad", xlab = "Antigüedad_Maxima",col = "green")
+
+
+```
+```{r}
+wilcox.test(x = data_seguros_sin_out_null_AntMax_ES_si$Antigüedad_Maxima, y = data_seguros_sin_out_null_AntMax_ES_no$Antigüedad_Maxima, alternative = "less", mu = 0, paired = FALSE)
+```
+DECISION
+existencia evidencias estadisticas para afirmar que la Antiguedad Maxima es menor en clientes que presentan siniestralidad con respecto de los no presentan siniestralidad
+
+En promedio los clientes antiguos no presenta sinietsatralidad
+
+
+###################
